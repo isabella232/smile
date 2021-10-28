@@ -1,0 +1,17 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: 893963170360.dkr.ecr.eu-central-1.amazonaws.com/circleci-amazon-corretto:11
+
+    steps:
+      - checkout
+      - run: cat /dev/null | sbt test:compile
+      - run: cat /dev/null | sbt test:test
+
+
+workflows:
+  build-and-deploy:
+    jobs:
+      - build:
+          context: ECR
