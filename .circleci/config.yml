@@ -19,12 +19,24 @@ aliases:
 jobs:
   build:
     docker:
-      - image: 893963170360.dkr.ecr.eu-central-1.amazonaws.com/circleci-amazon-corretto:11
-
+      - image: mozilla/sbt:11.0.8_1.3.13
     steps:
       - checkout
-      - run: cat /dev/null | sbt test:compile
-      - run: cat /dev/null | sbt test:test
+      - run:
+          name: Test
+          command: |
+            # sbt "project core" test:test
+            # sbt "project math" test:test
+            # sbt "project data" test:test
+            # sbt "project graph" test:test
+      - run:
+          name: build artifacts
+          command: |
+            sbt "project core" package
+            sbt "project math" package
+            sbt "project data" package
+            sbt "project graph" package
+
 
   fortify-translate-and-scan:
     executor: fortify
