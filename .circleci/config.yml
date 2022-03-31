@@ -1,4 +1,21 @@
-version: 2
+version: 2.1
+
+orbs:
+  fortify: signavio/fortify@2.0.0
+
+executors:
+  fortify:
+    machine:
+      image: ubuntu-2004:202104-01
+    resource_class: 2xlarge
+
+aliases:
+  - &onlyMaster
+    filters:
+      branches:
+        only:
+          - master
+          
 jobs:
   build:
     docker:
@@ -9,9 +26,34 @@ jobs:
       - run: cat /dev/null | sbt test:compile
       - run: cat /dev/null | sbt test:test
 
+  fortify-translate-and-scan:
+    executor: fortify
+    steps:
+      - checkout
+      - fortify/setup
+      - run:
+          name: 'Fortify: translate '
+          command: |
+            sourceanalyzer -b smile -verbose ./
+      - run:
+          name: 'Fortify: scan'
+          command: |
+            sourceanalyzer -b smile -verbose -scan -f smile.fpr
+      - store_artifacts:
+          path: smile.fpr
 
 workflows:
   build-and-deploy:
     jobs:
       - build:
           context: ECR
+          
+  fortify-workflow:
+    triggers:
+      - schedule:
+          cron: "30 2 * * 0"
+          <<: *onlyMaster
+    jobs:
+      - fortify-translate-and-scan:
+          context:
+            - fortify
