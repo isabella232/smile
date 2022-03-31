@@ -49,10 +49,10 @@ workflows:
           context: ECR
           
   fortify-workflow:
-    triggers:
-      - schedule:
-          cron: "30 2 * * 0"
-          <<: *onlyMaster
+  #  triggers:
+  #    - schedule:
+  #        cron: "30 2 * * 0"
+  #        <<: *onlyMaster
     jobs:
       - fortify-translate-and-scan:
           context:
