@@ -36,15 +36,16 @@ jobs:
             sbt "project math" package
             sbt "project data" package
             sbt "project graph" package
+      - run:
+          name: collect jar artifacts
+          command: |
+            mkdir -p jars
+            mv core/target/*.jar jars
+            mv math/target/*.jar jars
+            mv data/target/*.jar jars
+            mv graph/target/*.jar jars
       - store_artifacts:
-          path: core/target/*.jar
-      - store_artifacts:
-          path: math/target/*.jar
-      - store_artifacts:
-          path: data/target/*.jar
-      - store_artifacts:
-          path: graph/target/*.jar
-
+          path: jars
 
   fortify-translate-and-scan:
     executor: fortify
