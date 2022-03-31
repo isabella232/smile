@@ -36,6 +36,14 @@ jobs:
             sbt "project math" package
             sbt "project data" package
             sbt "project graph" package
+      - store_artifacts:
+          path: core/target/*.jar
+      - store_artifacts:
+          path: math/target/*.jar
+      - store_artifacts:
+          path: data/target/*.jar
+      - store_artifacts:
+          path: graph/target/*.jar
 
 
   fortify-translate-and-scan:
