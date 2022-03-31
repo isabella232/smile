@@ -55,11 +55,11 @@ jobs:
       - run:
           name: 'Fortify: translate '
           command: |
-            sourceanalyzer -b smile -verbose ./
+            sourceanalyzer -b smile -verbose -exclude "benchmark:demo:interpolation:nj4j:netlib:nlp:plot:scala:shell:symbolic" ./
       - run:
           name: 'Fortify: scan'
           command: |
-            sourceanalyzer -b smile -verbose -scan -f smile.fpr
+            sourceanalyzer -b smile -verbose -scan -f smile.fpr  -exclude "benchmark:demo:interpolation:nj4j:netlib:nlp:plot:scala:shell:symbolic"
       - store_artifacts:
           path: smile.fpr
 
