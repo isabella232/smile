@@ -1,17 +1,80 @@
-version: 2
+version: 2.1
+
+orbs:
+  fortify: signavio/fortify@2.0.0
+
+executors:
+  fortify:
+    machine:
+      image: ubuntu-2004:202201-02
+    resource_class: 2xlarge
+
+aliases:
+  - &onlyMaster
+    filters:
+      branches:
+        only:
+          - master
+          
 jobs:
   build:
     docker:
-      - image: 893963170360.dkr.ecr.eu-central-1.amazonaws.com/circleci-amazon-corretto:11
-
+      - image: mozilla/sbt:11.0.8_1.3.13
     steps:
       - checkout
-      - run: cat /dev/null | sbt test:compile
-      - run: cat /dev/null | sbt test:test
+      - run:
+          name: Test
+          command: |
+            # sbt "project core" test:test
+            # sbt "project math" test:test
+            # sbt "project data" test:test
+            # sbt "project graph" test:test
+      - run:
+          name: build artifacts
+          command: |
+            sbt "project core" package
+            sbt "project math" package
+            sbt "project data" package
+            sbt "project graph" package
+      - run:
+          name: collect jar artifacts
+          command: |
+            mkdir -p jars
+            mv core/target/*.jar jars
+            mv math/target/*.jar jars
+            mv data/target/*.jar jars
+            mv graph/target/*.jar jars
+      - store_artifacts:
+          path: jars
 
+  fortify-translate-and-scan:
+    executor: fortify
+    steps:
+      - checkout
+      - fortify/setup
+      - run:
+          name: 'Fortify: translate '
+          command: |
+            sourceanalyzer -b smile -verbose -exclude "benchmark:demo:interpolation:nj4j:netlib:nlp:plot:scala:shell:symbolic" ./
+      - run:
+          name: 'Fortify: scan'
+          command: |
+            sourceanalyzer -b smile -verbose -scan -f smile.fpr  -exclude "benchmark:demo:interpolation:nj4j:netlib:nlp:plot:scala:shell:symbolic"
+      - store_artifacts:
+          path: smile.fpr
 
 workflows:
   build-and-deploy:
     jobs:
       - build:
           context: ECR
+          
+  fortify-workflow:
+    triggers:
+      - schedule:
+          cron: "30 2 * * 0"
+          <<: *onlyMaster
+    jobs:
+      - fortify-translate-and-scan:
+          context:
+            - fortify
