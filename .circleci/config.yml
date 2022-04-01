@@ -63,7 +63,16 @@ jobs:
             sourceanalyzer -b smile -verbose -scan -f smile.fpr
       - store_artifacts:
           path: smile.fpr
-
+      - run:
+          name: 'Fortify: upload'
+          command: |
+            fortifyclient \
+               -url "$FORTIFY_SSC" \
+               -authtoken "$SSC_API_TOKEN" \
+               uploadFPR \
+               -file smile.fpr \
+               -project signavio-smile \
+               -version master
 workflows:
   build-and-deploy:
     jobs:
