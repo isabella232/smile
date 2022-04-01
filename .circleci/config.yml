@@ -56,7 +56,8 @@ jobs:
           name: 'Fortify: translate '
           command: |
             sourceanalyzer -b smile -verbose \
-              -exclude "benchmark:demo:interpolation:nj4j:netlib:nlp:plot:scala:shell:symbolic:**/src/test/java/**" \
+              -exclude "benchmark:demo:interpolation:nj4j:netlib:nlp:plot:scala:shell:symbolic" \
+              -exclude "*/src/test/java/*" \
               ./
       - run:
           name: 'Fortify: scan'
