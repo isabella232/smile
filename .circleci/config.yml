@@ -55,14 +55,24 @@ jobs:
       - run:
           name: 'Fortify: translate '
           command: |
-            sourceanalyzer -b smile -verbose -exclude "benchmark:demo:interpolation:nj4j:netlib:nlp:plot:scala:shell:symbolic" ./
+            sourceanalyzer -b smile -verbose \
+              core/src/main math/src/main data/src/main graph/src/main
       - run:
           name: 'Fortify: scan'
           command: |
-            sourceanalyzer -b smile -verbose -scan -f smile.fpr  -exclude "benchmark:demo:interpolation:nj4j:netlib:nlp:plot:scala:shell:symbolic"
+            sourceanalyzer -b smile -verbose -scan -f smile.fpr
       - store_artifacts:
           path: smile.fpr
-
+      - run:
+          name: 'Fortify: upload'
+          command: |
+            fortifyclient \
+               -url "$FORTIFY_SSC" \
+               -authtoken "$SSC_API_TOKEN" \
+               uploadFPR \
+               -file smile.fpr \
+               -project signavio-smile \
+               -version master
 workflows:
   build-and-deploy:
     jobs:
