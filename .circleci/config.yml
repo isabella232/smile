@@ -6,7 +6,7 @@ orbs:
 executors:
   fortify:
     machine:
-      image: ubuntu-2004:202111-02
+      image: ubuntu-2004:202201-02
     resource_class: 2xlarge
 
 aliases:
