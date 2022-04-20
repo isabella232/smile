@@ -2,7 +2,9 @@ version: 2.1
 
 orbs:
   fortify: signavio/fortify@2.0.0
-
+  blackduck: signavio/blackduck@1.11.0
+references:
+  workspace_root: &workspace_root ~/project
 executors:
   fortify:
     machine:
@@ -73,6 +75,49 @@ jobs:
                -file smile.fpr \
                -project signavio-smile \
                -version master
+
+  blackduck-scan:
+    working_directory: *workspace_root
+    machine:
+      image: ubuntu-2004:202010-01
+    resource_class: large
+    environment:
+      BLACKDUCK_PROJECT_GROUP: SAP_Signavio_Process_Intelligence
+    steps:
+      - checkout
+      - run:
+          name: Compile Core
+          command: |
+            sbt core/compile
+      - blackduck/blackduck-detect:
+          blackduck-project-group: $BLACKDUCK_PROJECT_GROUP
+          blackduck-project-name: smile
+          blackduck-project-path: /home/circleci/project/core
+      - run:
+          name: Compile Math
+          command: |
+            sbt math/compile
+      - blackduck/blackduck-detect:
+          blackduck-project-group: $BLACKDUCK_PROJECT_GROUP
+          blackduck-project-name: smile
+          blackduck-project-path: /home/circleci/project/math
+      - run:
+          name: Compile Data
+          command: |
+            sbt data/compile
+      - blackduck/blackduck-detect:
+          blackduck-project-group: $BLACKDUCK_PROJECT_GROUP
+          blackduck-project-name: smile
+          blackduck-project-path: /home/circleci/project/data
+      - run:
+          name: Compile Graph
+          command: |
+            sbt graph/compile
+      - blackduck/blackduck-detect:
+          blackduck-project-group: $BLACKDUCK_PROJECT_GROUP
+          blackduck-project-name: smile
+          blackduck-project-path: /home/circleci/project/graph
+
 workflows:
   build-and-deploy:
     jobs:
@@ -88,3 +133,16 @@ workflows:
       - fortify-translate-and-scan:
           context:
             - fortify
+
+  blackduck-nightly-scan:
+    triggers:
+      - schedule:
+          cron: "30 2 * * *" # UTC
+          <<: *onlyMaster
+    jobs:
+      - blackduck-scan:
+          context:
+            - ECR
+            - BlackDuck
+
+
