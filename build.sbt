@@ -11,7 +11,7 @@ lazy val commonSettings = Seq(
   javacOptions in (Compile, doc) ++= Seq("-Xdoclint:none"),
   javaOptions in test += "-Dsmile.threads=1",
   libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.7.25" % "test",
-  libraryDependencies += "junit" % "junit" % "4.12" % "test",
+  libraryDependencies += "junit" % "junit" % "4.13.2" % "test",
   libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test",
   scalaVersion := "2.12.4",
   scalacOptions := Seq("-unchecked", "-deprecation", "-feature", "-encoding", "utf8"),
